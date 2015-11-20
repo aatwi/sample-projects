@@ -1,1 +1,1 @@
-File.new("./target/test-classes/RubyExecutor/simpleCode.jmx", "w+")
+File.new('target/test-classes/RubyExecutor/simpleCode.jmx', "w+")
