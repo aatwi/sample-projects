@@ -2,14 +2,14 @@ import org.jruby.embed.jsr223.JRubyEngineFactory;
 
 import javax.script.ScriptEngine;
 import javax.script.ScriptException;
-import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
+import java.io.IOException;
 
 public class RubyExecutor {
-    public static File run(String rubyFile) throws FileNotFoundException, ScriptException {
+    public static void run(String rubyFilePath) throws IOException, ScriptException {
         final ScriptEngine scriptEngine = new JRubyEngineFactory().getScriptEngine();
-        scriptEngine.eval(new FileReader(rubyFile));
-        return new File(rubyFile.replace(".rb", ".jmx"));
+        final FileReader rubyFileReader = new FileReader(rubyFilePath);
+        scriptEngine.eval(rubyFileReader);
+        rubyFileReader.close();
     }
 }
