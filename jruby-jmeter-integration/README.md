@@ -10,31 +10,31 @@ Executing Ruby Scripts
 
 1. **Maven Dependency**
 
-    One of the possible options to execute ruby from java is by using JRuby. <br/>
-    Since we are writing a maven project then we need to add JRuby dependency in our pom. <br/>
-    To do that we simply add the following dependency to the dependencies section of our pom.xml file.<br/>
-    <pre>```
-    <dependency>
-        <groupId>org.jruby</groupId>
-        <artifactId>jruby-complete</artifactId><br/>
-        <version>9.0.3.0</version><br/>
-    </dependency>```</pre>
+     One of the possible options to execute ruby from java is by using JRuby. <br/>
+     Since we are writing a maven project then we need to add JRuby dependency in our pom. <br/>
+     To do that we simply add the following dependency to the dependencies section of our pom.xml file.<br/>  
+    
+        <dependency>
+            <groupId>org.jruby</groupId>
+            <artifactId>jruby-complete</artifactId>
+            <version>9.0.3.0</version>
+        </dependency>
 
 2. **RubyExecutor**
 
     Now we can reference JRuby in our code, so let us start by adding a new java file "RubyExecutor" to our project.<br/> 
     In this class we will add a static method that takes as parameter the full path of the ruby script. <br/>
     Below is the code of the method: <br/>
-    <pre>```
-    public class RubyExecutor {
-        public static void run(String rubyFile) throws FileNotFoundException, ScriptException {
-            final ScriptEngine scriptEngine = new JRubyEngineFactory().getScriptEngine();
-            final FileReader rubyFileReader = new FileReader(rubyFilePath);
-            scriptEngine.eval(rubyFileReader);
-            rubyFileReader.close();
+    
+        
+        public class RubyExecutor {
+            public static void run(String rubyFile) throws FileNotFoundException, ScriptException {
+                final ScriptEngine scriptEngine = new JRubyEngineFactory().getScriptEngine();
+                final FileReader rubyFileReader = new FileReader(rubyFilePath);
+                scriptEngine.eval(rubyFileReader);
+                rubyFileReader.close();
+            }
         }
-    }
-    ```</pre>
     <br/>
     The first line initializes an instance of JRubyEngine.<br/>
     The third line simply calls the eval method that is responsible of executing the ruby code in the JRubyEngine.<br/><br/>   
@@ -48,30 +48,34 @@ Executing Ruby Scripts
         3.1. Add a new folder "src/test/resources/RubyExecutor"     
         3.2. Add a new ruby file "simpleCode.rb" under that folder <br/>
         3.3. Add the following code to the ruby file. This code will simply create a new empty file with the name "simpleCode.jmx" <br/>
-        <pre>`File.new('target/test-classes/RubyExecutor/simpleCode.jmx', "w+")`</pre> 
+        
+        `File.new('target/test-classes/RubyExecutor/simpleCode.jmx', "w+")`
+         
     <br/>
     Then we write our test <br/>
-    <pre>```
-    @Test
-    public void
-    it_should_generate_a_file_from_ruby_code() throws IOException, ScriptException {
-        final String rubyFile = this.getClass().getResource("/RubyExecutor/simpleCode.rb").getFile();
-        RubyExecutor.run(rubyFile);
-        final File expectedFile = new File(rubyFile.replace("rb", "jmx"));
-        Assertions.assertThat(expectedFile).exists();
-    }```</pre>
+    
+        @Test
+        public void
+        it_should_generate_a_file_from_ruby_code() throws IOException, ScriptException {
+            final String rubyFile = this.getClass().getResource("/RubyExecutor/simpleCode.rb").getFile();
+            RubyExecutor.run(rubyFile);
+            final File expectedFile = new File(rubyFile.replace("rb", "jmx"));
+            Assertions.assertThat(expectedFile).exists();
+        }
    
     The test asks the RubyExecutor to execute a ruby file named "simpleCode.rb" (the one we created in the previous section) and asserts that the file "simpleCode.jmx" has been generated.<br/>
     The test should be green if we run it, and we should notice that the file "simpleCode.jmx" has been created under "target/test-classes/RubyExecutor/"<br/><br/>
     You can use maven to run tests. To do so run the below command from the directory "jruby-jmeter-integration" <br/>
-    <pre>```mvn clean install```</pre>
+        
+        mvn clean install
+    
     Below is what you would expect if the tests were successful: <br/>
-    <pre>```
-    [INFO] ------------------------------------------------------------------------
-    [INFO] BUILD SUCCESS
-    [INFO] ------------------------------------------------------------------------
-    [INFO] Total time: 01:17 min
-    ```</pre>
+    
+        [INFO] ------------------------------------------------------------------------
+        [INFO] BUILD SUCCESS
+        [INFO] ------------------------------------------------------------------------
+        [INFO] Total time: 01:17 min
+    
     *Note: I use the the library org.fest.assertions.Assertions, thus make sure you have added it to your dependencies in maven.*
 
 Executing Ruby-JMeter Scripts
@@ -88,15 +92,15 @@ Now that we are capable of executing ruby scripts from our project, we will work
     *Steps:* <br/>
         1.1. Add a new ruby file "src/test/resources/RubyExecutor/simpleJmx.rb" <br/>
         1.2. Add the following code to the ruby file: <br/>
-    <pre>```
-    require 'rubygems'
-    require 'ruby-jmeter'   
-    test do
-      threads count: 1, rampup: 0, loops: 1, scheduler: false do
-        beanshell_sampler query:'log.info("********Hello World********");'
-      end
-    end.jmx(file: 'target/test-classes/RubyExecutor/simpleJmx.jmx')
-    ```</pre><br/>
+    
+        require 'rubygems'
+        require 'ruby-jmeter'   
+        test do
+          threads count: 1, rampup: 0, loops: 1, scheduler: false do
+            beanshell_sampler query:'log.info("********Hello World********");'
+          end
+        end.jmx(file: 'target/test-classes/RubyExecutor/simpleJmx.jmx')
+    <br/>
     *Code Details:* <br/>
     The above code will generate the following test-plan:<br/>
     1.2.1. Create a test-plan<br/>
@@ -112,32 +116,34 @@ Now that we are capable of executing ruby scripts from our project, we will work
     Now we know exactly what our code should do; what is it's input and output. Thus it would be great if we write a simple JUnit test to test our code. <br/>
     Our test should execute the ruby script we wrote in the previous section, and is expected to pass if a respective JMX file was generated at the end of the execution.<br/>
     Based on this, we can add a new test to RubyExecutorTest.java 
-    <pre>```
-    @Test
-    public void
-    it_should_generate_a_jmx_file_from_ruby_code() throws IOException, ScriptException {
-        final String rubyFile = this.getClass().getResource("/RubyExecutor/simpleJmx.rb").getFile();
-        RubyExecutor.run(rubyFile);
-        final File expectedFile = new File(rubyFile.replace("rb", "jmx"));
-        Assertions.assertThat(expectedFile).exists();
-    }```</pre>
+    
+        @Test
+        public void
+        it_should_generate_a_jmx_file_from_ruby_code() throws IOException, ScriptException {
+            final String rubyFile = this.getClass().getResource("/RubyExecutor/simpleJmx.rb").getFile();
+            RubyExecutor.run(rubyFile);
+            final File expectedFile = new File(rubyFile.replace("rb", "jmx"));
+            Assertions.assertThat(expectedFile).exists();
+        }
     
     From this test we expect our code to generate the file "target/test-classes/RubyExecutor/simpleJmx.jmx". <br/>
-    Let us give this a try: 
-    <pre>```mvn clean install```</pre>
+    Let us give this a try:
+     
+        mvn clean install
+        
     At this stage, our project will fail with the following exception: 
-    <pre>```
-    LoadError: no such file to load -- ruby-jmeter
-        require at org/jruby/RubyKernel.java:939
-        require at uri:classloader:/META-INF/jruby.home/lib/ruby/stdlib/rubygems/core_ext/kernel_require.rb:54
-            <top> at <script>:2
-        Tests run: 2, Failures: 0, Errors: 1, Skipped: 0, Time elapsed: 11.657 sec <<< FAILURE!
-        it_should_generate_a_jmx_file_from_ruby_code(RubyExecutorTest)  Time elapsed: 11.446 sec  <<< ERROR!
-        javax.script.ScriptException: org.jruby.embed.EvalFailedException: (LoadError) no such file to load -- ruby-jmeter
-            at org.jruby.embed.jsr223.JRubyEngine.wrapException(JRubyEngine.java:104)
-            at org.jruby.embed.jsr223.JRubyEngine.eval(JRubyEngine.java:121)
-            at org.jruby.embed.jsr223.JRubyEngine.eval(JRubyEngine.java:146)
-    ```</pre>
+
+        LoadError: no such file to load -- ruby-jmeter
+            require at org/jruby/RubyKernel.java:939
+            require at uri:classloader:/META-INF/jruby.home/lib/ruby/stdlib/rubygems/core_ext/kernel_require.rb:54
+                <top> at <script>:2
+            Tests run: 2, Failures: 0, Errors: 1, Skipped: 0, Time elapsed: 11.657 sec <<< FAILURE!
+            it_should_generate_a_jmx_file_from_ruby_code(RubyExecutorTest)  Time elapsed: 11.446 sec  <<< ERROR!
+            javax.script.ScriptException: org.jruby.embed.EvalFailedException: (LoadError) no such file to load -- ruby-jmeter
+                at org.jruby.embed.jsr223.JRubyEngine.wrapException(JRubyEngine.java:104)
+                at org.jruby.embed.jsr223.JRubyEngine.eval(JRubyEngine.java:121)
+                at org.jruby.embed.jsr223.JRubyEngine.eval(JRubyEngine.java:146)
+
     The exception is telling us that it couldn't execute ruby-jmeter. Maven wasn't able to locate the ruby-jmeter libraries as we haven't referenced it yet in any of our code. <br/>
     To fix this problem we will have to add more dependencies to our pom file! <br/>
     
@@ -145,68 +151,70 @@ Now that we are capable of executing ruby scripts from our project, we will work
     RubyGems is a repository hosting ruby community's gems. Once referenced, maven will access this repository to sync the required ruby libraries locally to your project.<br/>
     In our case we are using the ruby-jmeter gems, to add dependency on that we should modify our pom file as follows: <br/>
     3.1. Add repository: This will be used by maven to download the gems from the specified url  
-    <pre>```
-    <repositories>
-        <repository>
-            <id>rubygems-releases</id>
-            <url>http://rubygems-proxy.torquebox.org/releases</url>
-        </repository>
-    </repositories>
-    ```</pre>
+    
+        <repositories>
+            <repository>
+                <id>rubygems-releases</id>
+                <url>http://rubygems-proxy.torquebox.org/releases</url>
+            </repository>
+        </repositories>
+    
     3.2. Add dependency to ruby-jmeter
-    <pre>```
-    <dependency>
-        <groupId>rubygems</groupId>
-        <artifactId>ruby-jmeter</artifactId>
-        <version>2.13.8</version>
-        <type>gem</type>
-    </dependency>
-    ```</pre>
+    
+        <dependency>
+            <groupId>rubygems</groupId>
+            <artifactId>ruby-jmeter</artifactId>
+            <version>2.13.8</version>
+            <type>gem</type>
+        </dependency>
+    
     3.3. Add a build step: 
-    <pre>```
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>de.saumya.mojo</groupId>
-                <artifactId>gem-maven-plugin</artifactId>
-                <version>1.1.3</version>
-                <extensions>true</extensions>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>initialize</goal>
-                        </goals>
-                    </execution>
-                </executions>
-                <configuration>
-                    <includeRubygemsInResources>true</includeRubygemsInResources>
-                </configuration>
-            </plugin>
-        </plugins>
-    </build>
-    ```</pre>
+    
+        <build>
+            <plugins>
+                <plugin>
+                    <groupId>de.saumya.mojo</groupId>
+                    <artifactId>gem-maven-plugin</artifactId>
+                    <version>1.1.3</version>
+                    <extensions>true</extensions>
+                    <executions>
+                        <execution>
+                            <goals>
+                                <goal>initialize</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                    <configuration>
+                        <includeRubygemsInResources>true</includeRubygemsInResources>
+                    </configuration>
+                </plugin>
+            </plugins>
+        </build>
+       
     3.4. Rerun maven
-    <pre>```mvn clean install```</pre>
+    
+        mvn clean install
+    
     We should get a Build Success
-    <pre>```-------------------------------------------------------
-     T E S T S
-    -------------------------------------------------------
-    Running RubyExecutorTest
-    I, [2015-12-23T17:27:19.643000 #7564]  INFO -- : Test plan saved to: target/test-classes/RubyExecutor/simpleJmx.jmx
-    Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 7.278 sec
-    Results :
-    Tests run: 2, Failures: 0, Errors: 0, Skipped: 0
-    [INFO]
-    [INFO] --- maven-jar-plugin:2.4:jar (default-jar) @ java-ruby-jmeter-integration ---
-    [INFO] Building jar: D:\Dev\java\workspace\GitHub\sample-projects\jruby-jmeter-integration\target\java-ruby-jmeter-integration-1.0-SNAPSHOT.jar
-    [INFO]
-    [INFO] --- maven-install-plugin:2.4:install (default-install) @ java-ruby-jmeter-integration ---
-    [INFO] Installing D:\Dev\java\workspace\GitHub\sample-projects\jruby-jmeter-integration\target\java-ruby-jmeter-integration-1.0-SNAPSHOT.jar to D:\Dev\maven_repo\aatwi\github\java-ruby-jmeter-integration\1.0-SNAPSHOT\java-ruby-jmeter-integration-1.0-SNAPSHOT.jar
-    [INFO] Installing D:\Dev\java\workspace\GitHub\sample-projects\jruby-jmeter-integration\pom.xml to D:\Dev\maven_repo\aatwi\github\java-ruby-jmeter-integration\1.0-SNAPSHOT\java-ruby-jmeter-integration-1.0-SNAPSHOT.pom
-    [INFO] ------------------------------------------------------------------------
-    [INFO] BUILD SUCCESS
-    [INFO] ------------------------------------------------------------------------
-    ```</pre>   
+    
+        -------------------------------------------------------
+         T E S T S
+        -------------------------------------------------------
+        Running RubyExecutorTest
+        I, [2015-12-23T17:27:19.643000 #7564]  INFO -- : Test plan saved to: target/test-classes/RubyExecutor/simpleJmx.jmx
+        Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 7.278 sec
+        Results :
+        Tests run: 2, Failures: 0, Errors: 0, Skipped: 0
+        [INFO]
+        [INFO] --- maven-jar-plugin:2.4:jar (default-jar) @ java-ruby-jmeter-integration ---
+        [INFO] Building jar: D:\Dev\java\workspace\GitHub\sample-projects\jruby-jmeter-integration\target\java-ruby-jmeter-integration-1.0-SNAPSHOT.jar
+        [INFO]
+        [INFO] --- maven-install-plugin:2.4:install (default-install) @ java-ruby-jmeter-integration ---
+        [INFO] Installing D:\Dev\java\workspace\GitHub\sample-projects\jruby-jmeter-integration\target\java-ruby-jmeter-integration-1.0-SNAPSHOT.jar to D:\Dev\maven_repo\aatwi\github\java-ruby-jmeter-integration\1.0-SNAPSHOT\java-ruby-jmeter-integration-1.0-SNAPSHOT.jar
+        [INFO] Installing D:\Dev\java\workspace\GitHub\sample-projects\jruby-jmeter-integration\pom.xml to D:\Dev\maven_repo\aatwi\github\java-ruby-jmeter-integration\1.0-SNAPSHOT\java-ruby-jmeter-integration-1.0-SNAPSHOT.pom
+        [INFO] ------------------------------------------------------------------------
+        [INFO] BUILD SUCCESS
+        [INFO] ------------------------------------------------------------------------
            
 Code Refactoring
 -------------------------------------
@@ -215,42 +223,47 @@ If we look at our current code, we can notice that there is some code duplicatio
 One thing we can do here is extracting the method "assertJmxFileExists" to remove this duplication.<br/> 
 Our new method will take the responsibility of calling RubyExecutor.run and asserting the generation of the JMX file.  <br/><br/>
 The code below shows the difference before and after refactoring.<br/>
-    Before Refactoring:<pre>```
-@Test
-public void
-it_should_generate_a_file_from_ruby_code() throws IOException, ScriptException {
-    final String rubyFile = this.getClass().getResource("/RubyExecutor/simpleCode.rb").getFile();
-    RubyExecutor.run(rubyFile);
-    final File expectedFile = new File(rubyFile.replace("rb", "jmx"));
-    Assertions.assertThat(expectedFile).exists();
-}  
-@Test
-public void
-it_should_generate_a_jmx_file_from_ruby_code() throws IOException, ScriptException {
-    final String rubyFile = this.getClass().getResource("/RubyExecutor/simpleJmx.rb").getFile();
-    RubyExecutor.run(rubyFile);
-    final File expectedFile = new File(rubyFile.replace("rb", "jmx"));
-    Assertions.assertThat(expectedFile).exists();
-}
-```</pre>  
-After Refactoring:<pre>```
-@Test
-public void
-it_should_generate_a_file_from_ruby_code() throws IOException, ScriptException {
-    assertJmxFileExists("simpleCode.rb");
-}
-@Test
-public void
-it_should_generate_a_jmx_file_from_ruby_code() throws IOException, ScriptException {
-    assertJmxFileExists("simpleJmx.rb");
-}
-private void assertJmxFileExists(final String rubyScript) throws IOException, ScriptException {
-    final String rubyFile = this.getClass().getResource("/RubyExecutor/" + rubyScript).getFile();
-    RubyExecutor.run(rubyFile);
-    final File expectedJmxFile = new File(rubyFile.replace("rb", "jmx"));
-    Assertions.assertThat(expectedJmxFile).exists();
-}
-```</pre>   
+    Before Refactoring:
+    
+    @Test
+    public void
+    it_should_generate_a_file_from_ruby_code() throws IOException, ScriptException {
+        final String rubyFile = this.getClass().getResource("/RubyExecutor/simpleCode.rb").getFile();
+        RubyExecutor.run(rubyFile);
+        final File expectedFile = new File(rubyFile.replace("rb", "jmx"));
+        Assertions.assertThat(expectedFile).exists();
+    }  
+    
+    @Test
+    public void
+    it_should_generate_a_jmx_file_from_ruby_code() throws IOException, ScriptException {
+        final String rubyFile = this.getClass().getResource("/RubyExecutor/simpleJmx.rb").getFile();
+        RubyExecutor.run(rubyFile);
+        final File expectedFile = new File(rubyFile.replace("rb", "jmx"));
+        Assertions.assertThat(expectedFile).exists();
+    }
+<br/>
+    After Refactoring:
+
+    @Test
+    public void
+    it_should_generate_a_file_from_ruby_code() throws IOException, ScriptException {
+        assertJmxFileExists("simpleCode.rb");
+    }
+    
+    @Test
+    public void
+    it_should_generate_a_jmx_file_from_ruby_code() throws IOException, ScriptException {
+        assertJmxFileExists("simpleJmx.rb");
+    }
+    
+    private void assertJmxFileExists(final String rubyScript) throws IOException, ScriptException {
+        final String rubyFile = this.getClass().getResource("/RubyExecutor/" + rubyScript).getFile();
+        RubyExecutor.run(rubyFile);
+        final File expectedJmxFile = new File(rubyFile.replace("rb", "jmx"));
+        Assertions.assertThat(expectedJmxFile).exists();
+    }
+    
 We can do more refactoring, but I think it is not worth at this point. The code is simple and can be easily read and understood. <br/>
 Finally, rerun maven to make sure that nothing was broken with this refactoring.<br/>
  <br/>    
