@@ -108,7 +108,7 @@ Now that we are capable of executing ruby scripts from our project, we will work
     1.2.3. Adds a BeanShellSampler as a child of the thread group to print "********Hello World********"  
     <br/> 
     Running the above ruby code will generate the following JMeter test plan:<br/>     
-    ![SimpleJmx](/src/test/resources/SimpleJmx.png)<br/>
+    ![SimpleJmx](src/main/resources/SimpleJmx.png)<br/>
     <br/>
     <br/>
     
